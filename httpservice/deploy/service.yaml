@@ -1,0 +1,18 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: httpservice
+  namespace: default
+spec:
+  template:
+    spec:
+      containers:
+        - image: lightbend/httpservice:0.1
+          ports:
+            - name: h2c
+              containerPort: 8080
+          env:
+            - name: MESSAGE
+              value: "Scala on Knative says hello!"
+            - name: HOST
+              value: "localhost"
