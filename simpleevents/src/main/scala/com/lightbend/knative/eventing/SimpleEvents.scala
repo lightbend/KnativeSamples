@@ -17,7 +17,7 @@ import scala.util._
 object SimpleEvents extends Directives with SprayJsonSupport{
   def main(args: Array[String]): Unit = {
     // Creates and initializes an Akka Actor System
-    implicit val system: ActorSystem = ActorSystem("HelloWorldHTTP")
+    implicit val system: ActorSystem = ActorSystem("simple-events")
     // Creates and initializes a Materializer to be used for the Akka HTTP Server
     implicit val mat: Materializer = Materializer(system)
     // Specifies where any Futures in this code will execute
@@ -42,6 +42,7 @@ object SimpleEvents extends Directives with SprayJsonSupport{
           val response = HelloResponse(s"$message ${request.name}!")
           if(sink.length > 0){
             // Sink spcified, post new event
+            log.info(s"Forwarding request to $sink")
             postdata(sink, response.toJson.compactPrint)
           }
           complete(response)

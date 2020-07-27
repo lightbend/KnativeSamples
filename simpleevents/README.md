@@ -31,6 +31,21 @@ Run curl command:
 curl -X POST -H "content-type: application/json"  -d '{"name":"Dave"}' <URL>>
 ````
 
+***Note:*** There is some weirdnes in Knative deployment. In this example our listener listens
+on two URL - root and /secondary. But when deployed, the url seems to always point to root, meaning that both 
+requests:
+````
+curl -X POST -H "content-type: application/json"  -d '{"name":"hw test"}' http://simpleevents.default.35.225.36.19.xip.io
+````
+and 
+````
+curl -X POST -H "content-type: application/json"  -d '{"name":"hw test"}' http://simpleevents.default.35.225.36.19.xip.io/secondary
+````
+return the same result:
+````
+"Hello from event listener  hw test!"
+````
+
 ## Cleanup
 ````
 kubectl delete ksvc simpleevents
