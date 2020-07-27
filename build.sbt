@@ -32,7 +32,6 @@ def sbtdockerAppBase(id: String)(base: String = id): Project = Project(id, base 
         repository = name.value.toLowerCase,
         tag = Some(version.value))
     ),
-
     buildOptions in docker := BuildOptions(cache = false)
   )
 lazy val httpservice = sbtdockerAppBase("httpservice")("./httpservice")
@@ -40,7 +39,7 @@ lazy val httpservice = sbtdockerAppBase("httpservice")("./httpservice")
   .settings(
     libraryDependencies ++= Seq(akkaActors, akkaStreams, akkaHTTP, akkaHTTP2, slf4jAPI, slf4jLog4J),
     javaAgents += "org.mortbay.jetty.alpn" % "jetty-alpn-agent" % alpnVersion % "runtime",
-    mainClass in Compile := Some("com.lightbend.knative.HelloWorldHTTP")
+    mainClass in Compile := Some("com.lightbend.knative.serving.HelloWorldHTTP")
   )
 
 lazy val grpcservice = sbtdockerAppBase("grpcservice")("./grpcservice")
@@ -49,9 +48,25 @@ lazy val grpcservice = sbtdockerAppBase("grpcservice")("./grpcservice")
       scalapb.gen(grpc=true) -> (sourceManaged in Compile).value
     ),
     libraryDependencies ++= Seq(
-       "com.thesamet.scalapb" %% "scalapb-runtime"      % scalapb.compiler.Version.scalapbVersion % "protobuf",
+      "com.thesamet.scalapb" %% "scalapb-runtime"      % scalapb.compiler.Version.scalapbVersion % "protobuf",
       "com.thesamet.scalapb"  %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion,
       "io.grpc"               % "grpc-netty-shaded"     % scalapb.compiler.Version.grpcJavaVersion,
       typesafeConfig, ficus, slf4jAPI, slf4jLog4J),
-    mainClass in Compile := Some("com.lightbend.knative.HelloWorldGRPC")
+    mainClass in Compile := Some("com.lightbend.knative.serving.HelloWorldGRPC")
+  )
+
+lazy val akkagrpcservice = sbtdockerAppBase("akkagrpcservice")("./akkagrpcservice")
+  .enablePlugins(AkkaGrpcPlugin, JavaAgent)
+  .settings(
+    libraryDependencies ++= Seq(akkaActors, akkaStreams, akkaHTTP, akkaHTTP2, akkaDiscovery, akkaSLF4, logback),
+    javaAgents += "org.mortbay.jetty.alpn" % "jetty-alpn-agent" % alpnVersion % "runtime",
+    mainClass in Compile := Some("com.lightbend.knative.serving.GreeterServer")
+  )
+
+lazy val simpleevents = sbtdockerAppBase("simpleevents")("./simpleevents")
+  .enablePlugins(JavaAgent)
+  .settings(
+    libraryDependencies ++= Seq(akkaActors, akkaStreams, akkaHTTP, akkaHTTP2, akkaJson, slf4jAPI, slf4jLog4J),
+    javaAgents += "org.mortbay.jetty.alpn" % "jetty-alpn-agent" % alpnVersion % "runtime",
+    mainClass in Compile := Some("com.lightbend.knative.eventing.SimpleEvents")
   )

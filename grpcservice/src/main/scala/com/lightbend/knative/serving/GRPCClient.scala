@@ -1,4 +1,4 @@
-package com.lightbend.knative
+package com.lightbend.knative.serving
 
 import com.typesafe.config.ConfigFactory
 import io.grpc.ManagedChannelBuilder
@@ -12,7 +12,10 @@ object GRPCClient {
 
   def main(args: Array[String]): Unit = {
 
-    val builder = ManagedChannelBuilder.forAddress("grpcservice.default.35.225.36.19.xip.io", 80)
+    val config = ConfigFactory.load()
+    val port = config.getString("helloworld.port").toInt
+    val host = config.getString("helloworld.host")
+    val builder = ManagedChannelBuilder.forAddress(host, port)
     builder.usePlaintext()
     val channel = builder.build
     val stub = GreeterGrpc.blockingStub(channel)

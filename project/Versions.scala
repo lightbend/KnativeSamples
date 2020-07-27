@@ -8,4 +8,6 @@ object Versions {
   val alpnVersion           = "2.0.9"
 
   val slf4jVersion          = "1.7.26"
+
+  val logBackVersion        = "1.2.3"
 }

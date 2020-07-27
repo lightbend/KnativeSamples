@@ -1,4 +1,4 @@
-package com.lightbend.knative
+package com.lightbend.knative.serving
 
 import com.typesafe.config.ConfigFactory
 import knative.grpc.examples.helloworld.helloworld._

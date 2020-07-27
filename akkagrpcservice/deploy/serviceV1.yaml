@@ -1,0 +1,18 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: grpcversioned
+  namespace: default
+spec:
+  template:
+    metadata:
+      name: grpcversioned-grpc-example-first
+    spec:
+      containers:
+        - image: lightbend/grpcservice:0.1
+          ports:
+            - name: h2c
+              containerPort: 8080
+          env:
+            - name: MESSAGE
+              value: "Welcome from GRPC"

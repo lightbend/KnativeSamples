@@ -1,4 +1,4 @@
-package com.lightbend.knative
+package com.lightbend.knative.serving
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
