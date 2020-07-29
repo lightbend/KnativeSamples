@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: events-source-deployment
+  labels:
+    app: cloud-events-source
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloud-events-source
+  template:
+    metadata:
+      labels:
+        app: cloud-events-source
+    spec:
+      containers:
+        - name: events-source
+          image: lightbend/cloudevents:0.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MESSAGE
+              value: "Cloud events publisher"
+            - name: HOST
+              value: "0.0.0.0"
+#            - name: K_SINK
+#              value: http://eventsreciever.default.35.225.36.19.xip.io

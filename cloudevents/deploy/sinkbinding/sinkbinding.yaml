@@ -1,0 +1,16 @@
+apiVersion: sources.knative.dev/v1alpha1
+kind: SinkBinding
+metadata:
+  name: bind-cloud-events
+spec:
+  subject:
+    apiVersion: apps/v1
+    kind: Deployment
+    selector:
+      matchLabels:
+        app: cloud-events-source
+  sink:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: eventsreciever

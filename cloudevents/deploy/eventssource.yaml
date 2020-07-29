@@ -1,0 +1,23 @@
+apiVersion: sources.knative.dev/v1alpha2
+kind: ContainerSource
+metadata:
+  name: eventspublisher
+spec:
+  template:
+    spec:
+      containers:
+        - image: lightbend/cloudevents:0.1
+          imagePullPolicy: Always
+          ports:
+            - name: h2c
+              containerPort: 8080
+          env:
+            - name: MESSAGE
+              value: "Cloud events publisher"
+            - name: HOST
+              value: "0.0.0.0"
+  sink:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: eventsreciever

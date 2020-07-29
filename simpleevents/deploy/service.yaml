@@ -18,5 +18,5 @@ spec:
             - name: HOST
               value: "localhost"
           # Uncomment this to send events somewhere.
-          #  - name: K_SINK
-          #    value: http://simpleevents.default.35.225.36.19.xip.io/secondary
+            - name: K_SINK
+              value: http://simpleeventsreciever.default.35.225.36.19.xip.io
