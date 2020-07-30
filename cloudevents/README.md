@@ -17,10 +17,26 @@ sbt docker
 ````
 ##Configuring the Service descriptor
 There are 2 [approaches](https://github.com/knative/docs/tree/master/docs/eventing/samples/writing-event-source-easy-way)
- which I tried - direct connection using [ContainerSource](deploy) and [sinkbinding](deploy/sinkbinding).
- Both of them resolve sink to a value of ` http://eventsreciever.default.svc.cluster.local` which does not seem
- to accept post requests, while an actual endpoint `http://eventsreciever.default.35.225.36.19.xip.io` does.
- So there is still some confusion how it should work.
+which I tried - direct connection using [ContainerSource](deploy) and [sinkbinding](deploy/sinkbinding).
+Both of them resolve sink to a value of ` http://eventsreciever.default.svc.cluster.local` which does not seem
+to accept post requests, while an actual endpoint `http://eventsreciever.default.35.225.36.19.xip.io` does.
+So there is still some confusion how it should work.
+
+According to this [document](https://knative.dev/docs/serving/cluster-local-route/), in order 
+to Label a service to be cluster-local, run the following command:
+````
+kubectl label kservice eventsreciever serving.knative.dev/visibility=cluster-local 
+```` 
+After this, running
+````
+kubectl get ksvc
+````
+returns the following:
+````
+NAME                   URL                                                       LATESTCREATED                       LATESTREADY                         READY   REASON
+eventsreciever         http://eventsreciever.default.svc.cluster.local           eventsreciever-mn8n5                eventsreciever-mn8n5                True    
+````
+So the access switched to local, but it still does not work.
 
 ## Cleanup
 ````
