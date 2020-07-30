@@ -21,6 +21,28 @@ Version 1.6.0
 ````
 bin/istioctl install --set profile=demo
 ````
+***Note*** when installing Istio make sure that you add `cluster-local-gateway` as described [here](https://knative.dev/docs/install/installing-istio/)
+
+I just added this:
+````
+     - name: cluster-local-gateway
+        enabled: true
+        label:
+          istio: cluster-local-gateway
+          app: cluster-local-gateway
+        k8s:
+          service:
+            type: ClusterIP
+            ports:
+            - port: 15020
+              name: status-port
+            - port: 80
+              name: http2
+            - port: 443
+              name: https
+````
+to demo profile
+
 Install Istio for Knative
 ````
 kubectl apply --filename https://github.com/knative/net-istio/releases/download/v0.16.0/release.yaml

@@ -36,7 +36,8 @@ returns the following:
 NAME                   URL                                                       LATESTCREATED                       LATESTREADY                         READY   REASON
 eventsreciever         http://eventsreciever.default.svc.cluster.local           eventsreciever-mn8n5                eventsreciever-mn8n5                True    
 ````
-So the access switched to local, but it still does not work.
+
+This is only required to disable remote access, local access works even if the service is not made local. 
 
 ## Cleanup
 ````
