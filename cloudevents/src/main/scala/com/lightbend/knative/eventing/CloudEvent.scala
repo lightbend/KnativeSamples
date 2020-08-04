@@ -39,17 +39,36 @@ import scala.util.Try
  *    "data_base64": "description": "Base64 encoded event payload. Must adhere to RFC4648.","examples": ["Zm9vYg=="]
  *
  *    "required": ["id", "source", "specversion", "type"]
+ *
+ *    To allow some of the variables to come from the header we make all of the variables here optional
  */
 
-case class CloudEvent(var id: String, var source: URI, var specversion : String, var `type`: String, var datacontenttype: Option[String],
-                      var dataschema: Option[URI], var subject: Option[String], var time: Option[ZonedDateTime],
-                      var data: Option[String], var data_base64: Option[Array[Byte]], var extensions: Option[Map[String, Any]]){
+case class CloudEvent(var id: Option[String], var source: Option[URI], var specversion : Option[String], var `type`: Option[String],
+                      var datacontenttype: Option[String], var dataschema: Option[URI], var subject: Option[String],
+                      var time: Option[ZonedDateTime], var data: Option[String], var data_base64: Option[Array[Byte]],
+                      var extensions: Option[Map[String, Any]]){
+
+  def isValid() : Boolean = id.isDefined && source.isDefined && specversion.isDefined && `type`.isDefined
+
   override def toString: String = {
     val builder = new StringBuilder()
-    builder.append("CloudEvent{").append(s"id=$id,")
-    builder.append(s" source=${source.toString},")
-    builder.append(s" specversion=$specversion,")
-    builder.append(s" type=${`type`},")
+    builder.append("CloudEvent{")
+    id match {
+      case Some(i) => builder.append(s"id=$i,")
+      case _ =>
+    }
+    source match {
+      case Some(s) => builder.append(s" source=${s.toString},")
+      case _ =>
+    }
+    specversion match {
+      case Some(s) => builder.append(s" specversion=$s,")
+      case _ =>
+    }
+    `type` match {
+      case Some(t) => builder.append(s" type=$t,")
+      case _ =>
+    }
     datacontenttype match {
       case Some(d) => builder.append(s" datacontenttype = $d,")
       case _ =>
@@ -134,7 +153,7 @@ object CloudEventJsonSupport extends DefaultJsonProtocol with URIJsonSupport wit
   implicit val helloRequestFormat = jsonFormat11(CloudEvent.apply)
 }
 
-object CloudEvent{
+object CloudEvent {
 
   import CloudEventJsonSupport._
 
@@ -146,10 +165,10 @@ object CloudEvent{
  *  ce-type: <event.type>
  */
     val headers : scala.collection.immutable.Seq[HttpHeader] = scala.collection.immutable.Seq(
-      RawHeader("ce-id", event.id),
-      RawHeader("ce-source", event.source.toString),
-      RawHeader("ce-specversion", event.specversion),
-      RawHeader("ce-type", event.`type`))
+      RawHeader("ce-id", event.id.getOrElse("")),
+      RawHeader("ce-source", event.source.getOrElse("").toString),
+      RawHeader("ce-specversion", event.specversion.getOrElse("")),
+      RawHeader("ce-type", event.`type`.getOrElse("")))
     HttpRequest(
       method = HttpMethods.POST,
       uri = uri,

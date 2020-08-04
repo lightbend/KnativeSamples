@@ -34,10 +34,10 @@ object CloudEventsSender extends Directives with SprayJsonSupport{
     println(s"Starting event sender - message: $message, sink: $sink")
 
     val event = CloudEvent(
-      id = "",
-      source = URI.create("https://com.lightbend.knative.eventing/CloudEventsSender"),
-      specversion = "1.0",
-      `type` = "dev.knative.eventing.samples.heartbeat",
+      id = None,
+      source = Some(URI.create("https://com.lightbend.knative.eventing/CloudEventsSender")),
+      specversion = Some("1.0"),
+      `type` = Some("dev.knative.eventing.samples.heartbeat"),
       datacontenttype = Some("application/json"),
       dataschema = Some(URI.create("https://knative.dev/cloudevents/V1")),
       subject = Some("heartbeat"),
@@ -48,7 +48,7 @@ object CloudEventsSender extends Directives with SprayJsonSupport{
 
     var count = 0
     while (true) {
-      event.id = UUID.randomUUID().toString
+      event.id = Some(UUID.randomUUID().toString)
       event.time = Some(ZonedDateTime.now())
       event.data = Some(EventData(message, count).toJson.compactPrint)
       val response = Http().singleRequest(CloudEvent.buildHttpRequest(event, sink))
