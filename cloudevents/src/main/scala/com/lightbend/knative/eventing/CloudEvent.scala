@@ -8,8 +8,10 @@ import java.net.URI
 import java.time.ZonedDateTime
 import java.util.Arrays
 
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model._
+import akka.http.scaladsl.server._
 import spray.json._
 
 import scala.util.Try
@@ -153,7 +155,7 @@ object CloudEventJsonSupport extends DefaultJsonProtocol with URIJsonSupport wit
   implicit val helloRequestFormat = jsonFormat11(CloudEvent.apply)
 }
 
-object CloudEvent {
+trait CloudEventProcessing extends Directives with SprayJsonSupport {
 
   import CloudEventJsonSupport._
 
@@ -176,4 +178,30 @@ object CloudEvent {
       headers = headers
     )
   }
+
+  def route(eventpath : String = "") : Route =
+    path(eventpath) {
+      post {
+        extractRequest { request =>
+          request.headers.foreach(header => {
+            println(s"Header ${header.name()} - ${header.value()}")
+          })
+          entity(as[CloudEvent]) { entity ⇒
+            request.headers.foreach(header => {
+              header.name() match {
+                case name if name == "ce-id" => entity.id = Some(header.value())
+                case name if name == "ce-source" => entity.source = Some(URI.create(header.value()))
+                case name if name == "ce-specversion" => entity.specversion = Some(header.value())
+                case name if name == "ce-type" => entity.`type` = Some(header.value())
+                case _ =>
+              }
+            })
+            processEvent(entity)
+            complete(StatusCodes.OK)
+          }
+        }
+      }
+    }
+
+  def processEvent(event : CloudEvent) : Unit
 }

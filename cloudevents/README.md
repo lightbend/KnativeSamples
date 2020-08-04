@@ -40,7 +40,7 @@ There are several [approaches](https://github.com/knative/docs/tree/master/docs/
 which I tried: 
 * direct connection using [ContainerSource](deploy) 
 * [sinkbinding](deploy/sinkbinding).
-* using a [broker](deploy/broker)
+* using a [broker](deploy/broker). For more details look [here](https://knative.dev/docs/eventing/broker/)
 
 For direct connection use [eventsreciever.yaml](deploy/eventsreciever.yaml) and [eventssource.yaml.yaml](deploy/eventssource.yaml) to do the following:
 ````

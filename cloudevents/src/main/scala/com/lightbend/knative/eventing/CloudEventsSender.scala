@@ -33,6 +33,8 @@ object CloudEventsSender extends Directives with SprayJsonSupport{
 
     println(s"Starting event sender - message: $message, sink: $sink")
 
+    val processor = new EventProcessor()
+
     val event = CloudEvent(
       id = None,
       source = Some(URI.create("https://com.lightbend.knative.eventing/CloudEventsSender")),
@@ -51,7 +53,7 @@ object CloudEventsSender extends Directives with SprayJsonSupport{
       event.id = Some(UUID.randomUUID().toString)
       event.time = Some(ZonedDateTime.now())
       event.data = Some(EventData(message, count).toJson.compactPrint)
-      val response = Http().singleRequest(CloudEvent.buildHttpRequest(event, sink))
+      val response = Http().singleRequest(processor.buildHttpRequest(event, sink))
       response
         .onComplete {
           case Success(msg) =>
