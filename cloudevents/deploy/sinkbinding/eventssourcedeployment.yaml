@@ -25,5 +25,3 @@ spec:
               value: "Cloud events publisher"
             - name: HOST
               value: "0.0.0.0"
-#            - name: K_SINK
-#              value: http://eventsreciever.default.35.225.36.19.xip.io

@@ -1,0 +1,14 @@
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: service-consumer-trigger
+spec:
+  broker: default
+  filter:
+    attributes:
+      source: https://com.lightbend.knative.eventing/CloudEventsSender
+  subscriber:
+    ref:
+      apiVersion: v1
+      kind: Service
+      name: service-consumer

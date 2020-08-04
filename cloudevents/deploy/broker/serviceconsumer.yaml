@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloud-events-consumer
+  template:
+    metadata:
+      labels:
+        app: cloud-events-consumer
+    spec:
+      containers:
+        - name: event-display
+          image: lightbend/cloudevents:0.1
+          imagePullPolicy: Always
+          command: ["/opt/app/bin/cloud-events-reciever"]
+          ports:
+            - name: h2c
+              containerPort: 8080
+          env:
+            - name: HOST
+              value: "0.0.0.0"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-consumer
+spec:
+  selector:
+    app: cloud-events-consumer
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

@@ -16,11 +16,6 @@ To build run the command
 sbt docker
 ````
 ##Configuring the Service descriptor
-There are 2 [approaches](https://github.com/knative/docs/tree/master/docs/eventing/samples/writing-event-source-easy-way)
-which I tried - direct connection using [ContainerSource](deploy) and [sinkbinding](deploy/sinkbinding).
-Both of them resolve sink to a value of ` http://eventsreciever.default.svc.cluster.local` which does not seem
-to accept post requests, while an actual endpoint `http://eventsreciever.default.35.225.36.19.xip.io` does.
-So there is still some confusion how it should work.
 
 According to this [document](https://knative.dev/docs/serving/cluster-local-route/), in order 
 to Label a service to be cluster-local, run the following command:
@@ -38,6 +33,44 @@ eventsreciever         http://eventsreciever.default.svc.cluster.local          
 ````
 
 This is only required to disable remote access, local access works even if the service is not made local. 
+
+***Note*** There seem no way to remove label `cluster-local` short of recreating a service
+
+There are several [approaches](https://github.com/knative/docs/tree/master/docs/eventing/samples/writing-event-source-easy-way)
+which I tried: 
+* direct connection using [ContainerSource](deploy) 
+* [sinkbinding](deploy/sinkbinding).
+* using a [broker](deploy/broker)
+
+For direct connection use [eventsreciever.yaml](deploy/eventsreciever.yaml) and [eventssource.yaml.yaml](deploy/eventssource.yaml) to do the following:
+````
+kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/eventsreciever.yaml
+kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/eventssource.yaml
+````
+Once everything is running, you can see that the events are published and reciever shows events
+
+For sink binding connection use [eventsreciever.yaml](deploy/sinkbinding/eventsreciever.yaml), 
+[eventssourcedeployment.yaml](deploy/sinkbinding/eventssourcedeployment.yaml) and [sinkbinding.yaml](deploy/sinkbinding/sinkbinding.yaml) and to do the following:
+````
+kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/sinkbinding/eventsreciever.yaml
+kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/sinkbinding/eventssourcedeployment.yaml
+kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/sinkbinding/sinkbinding.yaml
+````
+
+Unlike, the previous case, where event source was directly binded to the reciever, here the binding is done using a separate
+object - sinkbinding.yaml.
+
+For broker based connection use [broker.yaml](deploy/broker/broker.yaml), [eventssource.yaml](deploy/broker/eventssource.yaml) 
+[serviceconsumer.yaml](deploy/broker/serviceconsumer.yaml) and [trigger.yaml](deploy/broker/trigger.yaml) and to do the following:
+````
+kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/broker/broker.yaml
+kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/broker/eventssource.yaml
+kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/broker/serviceconsumer.yaml
+kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/broker/trigger.yaml
+````
+Here event source is writing to broker, which in turn writes to the event consumer. Connection between 
+event source and broker is set in the eventssource.yaml (sink), while connection between broker 
+and event consumer is set through trigger object.
 
 ## Cleanup
 ````

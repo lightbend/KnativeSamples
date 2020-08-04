@@ -6,7 +6,6 @@ import java.time.ZonedDateTime
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.model._
 import akka.http.scaladsl.server._
 import akka.stream._
 
@@ -36,27 +35,23 @@ object CloudEventsSender extends Directives with SprayJsonSupport{
 
     val event = CloudEvent(
       id = "",
-      source = Some(URI.create("https://com.lightbend.knative.eventing/CloudEventsSender")),
-      `type` = Some("dev.knative.eventing.samples.heartbeat"),
+      source = URI.create("https://com.lightbend.knative.eventing/CloudEventsSender"),
+      specversion = "1.0",
+      `type` = "dev.knative.eventing.samples.heartbeat",
       datacontenttype = Some("application/json"),
       dataschema = Some(URI.create("https://knative.dev/cloudevents/V1")),
       subject = Some("heartbeat"),
       time = None,
       data = None,
+      data_base64 = None,
       extensions = Some(Map("beat" -> true, "heart" -> "yes")))
 
     var count = 0
     while (true) {
       event.id = UUID.randomUUID().toString
       event.time = Some(ZonedDateTime.now())
-      event.data = Some(EventData(message, count).toJson.compactPrint.getBytes())
-       val response = Http().singleRequest(
-        HttpRequest(
-          method = HttpMethods.POST,
-          uri = sink,
-          entity = HttpEntity(ContentTypes.`application/json`, event.toJson.compactPrint)
-        )
-      )
+      event.data = Some(EventData(message, count).toJson.compactPrint)
+      val response = Http().singleRequest(CloudEvent.buildHttpRequest(event, sink))
       response
         .onComplete {
           case Success(msg) =>

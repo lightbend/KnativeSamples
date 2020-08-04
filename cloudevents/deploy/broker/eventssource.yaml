@@ -1,0 +1,23 @@
+apiVersion: sources.knative.dev/v1alpha2
+kind: ContainerSource
+metadata:
+  name: eventspublisher
+spec:
+  template:
+    spec:
+      containers:
+        - image: lightbend/cloudevents:0.1
+          imagePullPolicy: Always
+          ports:
+            - name: h2c
+              containerPort: 8080
+          env:
+            - name: MESSAGE
+              value: "Cloud events publisher with broker"
+            - name: HOST
+              value: "0.0.0.0"
+  sink:
+    ref:
+      apiVersion: eventing.knative.dev/v1
+      kind: Broker
+      name: default
