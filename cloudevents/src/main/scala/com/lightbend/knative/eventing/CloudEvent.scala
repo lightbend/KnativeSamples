@@ -155,18 +155,18 @@ object CloudEventJsonSupport extends DefaultJsonProtocol with URIJsonSupport wit
   implicit val helloRequestFormat = jsonFormat11(CloudEvent.apply)
 }
 
-trait CloudEventProcessing extends Directives with SprayJsonSupport {
+object CloudEvent {
 
   import CloudEventJsonSupport._
 
-  def buildHttpRequest(event : CloudEvent, uri : String) : HttpRequest = {
-/* Cloud events header (see https://github.com/cloudevents/spec/blob/master/primer.md#creating-cloudevents)
+  def buildHttpRequest(event: CloudEvent, uri: String): HttpRequest = {
+    /* Cloud events header (see https://github.com/cloudevents/spec/blob/master/primer.md#creating-cloudevents)
  *  ce-id: <event.id>
  *  ce-source: <event.source>
  *  ce-specversion: <event.specificversion>
  *  ce-type: <event.type>
  */
-    val headers : scala.collection.immutable.Seq[HttpHeader] = scala.collection.immutable.Seq(
+    val headers: scala.collection.immutable.Seq[HttpHeader] = scala.collection.immutable.Seq(
       RawHeader("ce-id", event.id.getOrElse("")),
       RawHeader("ce-source", event.source.getOrElse("").toString),
       RawHeader("ce-specversion", event.specversion.getOrElse("")),
@@ -178,6 +178,11 @@ trait CloudEventProcessing extends Directives with SprayJsonSupport {
       headers = headers
     )
   }
+}
+
+trait CloudEventProcessing extends Directives with SprayJsonSupport {
+
+  import CloudEventJsonSupport._
 
   def route(eventpath : String = "") : Route =
     path(eventpath) {
