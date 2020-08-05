@@ -31,7 +31,7 @@ class GreeterServer(system: ActorSystem) {
     val port = config.getString("helloworld.port").toInt
 
     val service: HttpRequest => Future[HttpResponse] =
-      GreeterHandler(new GreeterServiceImpl(mat, system.log, message))
+      GreeterHandler(new GreeterServiceImpl(system.log, message))
 
     val bound = Http().bindAndHandleAsync(
       service,

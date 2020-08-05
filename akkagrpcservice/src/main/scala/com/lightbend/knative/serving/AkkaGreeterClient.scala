@@ -20,10 +20,10 @@ object AkkaGreeterClient {
     val config = sys.settings.config
 
     // These are read from the application.conf file under `resources`
-//    val host = config.getString("helloworld.host")
-//    val port = config.getString("helloworld.port").toInt
-    val host = "grpcversioned.default.35.225.36.19.xip.io"
-    val port = 80
+    val host = config.getString("helloworld.host")
+    val port = config.getString("helloworld.port").toInt
+//    val host = "grpcversioned.default.35.225.36.19.xip.io"
+//    val port = 80
     println(s"Connecting to server $host:$port")
     // Configure the client by code:
     val clientSettings = GrpcClientSettings.connectToServiceAt(host, port).withTls(false)

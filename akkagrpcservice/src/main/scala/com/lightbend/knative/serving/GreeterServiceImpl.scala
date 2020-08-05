@@ -12,10 +12,7 @@ import akka.stream.scaladsl.Source
 import knative.grpc.examples.helloworld._
 
 
-class GreeterServiceImpl(materializer: Materializer, log: LoggingAdapter, message: String) extends Greeter {
-
-
-  private implicit val mat: Materializer = materializer
+class GreeterServiceImpl(log: LoggingAdapter, message: String)(implicit mat: Materializer) extends Greeter {
 
   val (inboundHub: Sink[HelloRequest, NotUsed], outboundHub: Source[HelloReply, NotUsed]) =
     MergeHub.source[HelloRequest]
