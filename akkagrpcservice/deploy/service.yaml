@@ -1,0 +1,16 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: grpcserviceakka
+  namespace: default
+spec:
+  template:
+    spec:
+      containers:
+        - image: lightbend/akkagrpcservice:0.1
+          ports:
+            - name: h2c
+              containerPort: 8080
+          env:
+            - name: MESSAGE
+              value: "Welcome from Akka GRPC"
