@@ -8,13 +8,9 @@ import java.net.URI
 import java.time.ZonedDateTime
 import java.util.Arrays
 
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.model.headers.RawHeader
+import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server._
-import spray.json._
-
-import scala.util.Try
 
 /*
  *    "id": "description": "Identifies the event.", "examples": ["A234-1234-1234"]
@@ -45,42 +41,25 @@ import scala.util.Try
  *    To allow some of the variables to come from the header we make all of the variables here optional
  */
 
-case class CloudEvent(var id: Option[String], var source: Option[URI], var specversion : Option[String], var `type`: Option[String],
+case class CloudEvent(var id: String, var source: URI, var specversion : String, var `type`: String,
                       var datacontenttype: Option[String], var dataschema: Option[URI], var subject: Option[String],
                       var time: Option[ZonedDateTime], var data: Option[String], var data_base64: Option[Array[Byte]],
-                      var extensions: Option[Map[String, Any]]){
+                      var extensions: Option[Map[String, Any]]) {
 
-  def isValid() : Boolean = id.isDefined && source.isDefined && specversion.isDefined && `type`.isDefined
 
   override def toString: String = {
     val builder = new StringBuilder()
-    builder.append("CloudEvent{")
-    id match {
-      case Some(i) => builder.append(s"id=$i,")
-      case _ =>
-    }
-    source match {
-      case Some(s) => builder.append(s" source=${s.toString},")
-      case _ =>
-    }
-    specversion match {
-      case Some(s) => builder.append(s" specversion=$s,")
-      case _ =>
-    }
-    `type` match {
-      case Some(t) => builder.append(s" type=$t,")
-      case _ =>
-    }
+    builder.append("CloudEvent{").append(s"id=$id,").append(s" source=${source.toString},").append(s" specversion=$specversion,").append(s" type=${`type`},")
     datacontenttype match {
       case Some(d) => builder.append(s" datacontenttype = $d,")
       case _ =>
     }
     dataschema match {
-      case Some(d) => builder.append(s" dataschema = $d,")
+      case Some(d) => builder.append(s" dataschema = ${d.toString},")
       case _ =>
     }
     subject match {
-      case Some(s) => builder.append(s" subject=${s.toString},")
+      case Some(s) => builder.append(s" subject=$s,")
       case _ =>
     }
     time match {
@@ -88,19 +67,11 @@ case class CloudEvent(var id: Option[String], var source: Option[URI], var specv
       case _ =>
     }
     data match {
-      case Some(d) => builder.append(s" data=$data,")
+      case Some(d) => builder.append(s" data=$d,")
       case _ =>
     }
     data_base64 match {
-      case Some(d) =>
-        datacontenttype match {
-          case Some(ct) =>
-            if(ct.contains("json") || ct.startsWith("text") || ct.contains("javascript"))
-              builder.append(s" data=${new String(d)},")
-            else
-              builder.append(s" data=${Arrays.toString(d)},")
-          case _ => builder.append(s" data=${Arrays.toString(d)},")
-        }
+      case Some(d) => builder.append(s" data=$d,")
       case _ =>
     }
     extensions match {
@@ -110,79 +81,61 @@ case class CloudEvent(var id: Option[String], var source: Option[URI], var specv
     builder.append("}")
     builder.toString()
   }
-}
 
-trait URIJsonSupport extends DefaultJsonProtocol {
-  implicit object URIFormat extends JsonFormat[URI] {
-    def write(uri: URI) = JsString(uri.toString)
-
-    def read(json: JsValue): URI = json match {
-      case JsString(uri) ⇒ Try(URI.create(uri)).getOrElse(deserializationError(s"Expected valid URI but got '$uri'."))
-      case other          ⇒ deserializationError(s"Expected URI as JsString, but got: $other")
+  def toHttpRequest(uri: String): HttpRequest = {
+    var headers: scala.collection.immutable.Seq[HttpHeader] = scala.collection.immutable.Seq(
+      // Mandatory fields
+      RawHeader("ce-id", id),
+      RawHeader("ce-source", source.toString),
+      RawHeader("ce-specversion", specversion),
+      RawHeader("ce-type", `type`))
+    // OPtional fields
+    datacontenttype match {
+      case Some(c) => headers = headers :+ RawHeader("ce-datacontenttype", c)
+      case _ => headers = headers :+ RawHeader("ce-datacontenttype", "application/json")
     }
-  }
-}
 
-trait ZonedDateTimeJsonSupport extends DefaultJsonProtocol {
-  implicit object ZonedDateTimeFormat extends JsonFormat[ZonedDateTime] {
-    def write(time: ZonedDateTime) = JsString(time.toString)
-
-    def read(json: JsValue): ZonedDateTime = json match {
-      case JsString(time) ⇒ Try(ZonedDateTime.parse(time)).getOrElse(deserializationError(s"Expected valid ZonedDateTime but got '$time'."))
-      case other          ⇒ deserializationError(s"Expected ZonedDateTime as JsString, but got: $other")
+    dataschema match {
+      case Some(d) => headers = headers :+ RawHeader("ce-dataschema", d.toString)
+      case _ =>
     }
-  }
-}
-
-trait AnyJsonSupport extends DefaultJsonProtocol {
-  implicit object AnyJsonFormat extends JsonFormat[Any] {
-    def write(x: Any) = x match {
-      case n: Int => JsNumber(n)
-      case s: String => JsString(s)
-      case b: Boolean if b == true => JsTrue
-      case b: Boolean if b == false => JsFalse
+    subject match {
+      case Some(s) => headers = headers :+ RawHeader("ce-subject", s)
+      case _ =>
     }
-    def read(value: JsValue) = value match {
-      case JsNumber(n) => n.intValue()
-      case JsString(s) => s
-      case JsTrue => true
-      case JsFalse => false
+    time match {
+      case Some(t) => headers = headers :+ RawHeader("ce-time", t.toString)
+      case _ =>
     }
-  }
-}
+    extensions match {
+      case Some(e) =>
+        for ((key, value) <- e)
+          headers = headers :+ RawHeader(s"ce-${key}extension", value.toString)
+      case _ =>
+    }
 
-object CloudEventJsonSupport extends DefaultJsonProtocol with URIJsonSupport with ZonedDateTimeJsonSupport with AnyJsonSupport {
-  implicit val helloRequestFormat = jsonFormat11(CloudEvent.apply)
-}
-
-object CloudEvent {
-
-  import CloudEventJsonSupport._
-
-  def buildHttpRequest(event: CloudEvent, uri: String): HttpRequest = {
-    /* Cloud events header (see https://github.com/cloudevents/spec/blob/master/primer.md#creating-cloudevents)
- *  ce-id: <event.id>
- *  ce-source: <event.source>
- *  ce-specversion: <event.specificversion>
- *  ce-type: <event.type>
- */
-    val headers: scala.collection.immutable.Seq[HttpHeader] = scala.collection.immutable.Seq(
-      RawHeader("ce-id", event.id.getOrElse("")),
-      RawHeader("ce-source", event.source.getOrElse("").toString),
-      RawHeader("ce-specversion", event.specversion.getOrElse("")),
-      RawHeader("ce-type", event.`type`.getOrElse("")))
+    // Entity
+    val entity = datacontenttype match {
+      case Some(dtype) =>
+        if (dtype.contains("json") || dtype.contains("javascript") || dtype.contains("text")) {
+          HttpEntity(ContentTypes.`application/json`, data.getOrElse(""))
+        } else {
+          HttpEntity(ContentTypes.`application/octet-stream`, data_base64.getOrElse(Array[Byte]())
+          )
+        }
+      case _ => HttpEntity(ContentTypes.`application/json`, "")
+    }
     HttpRequest(
       method = HttpMethods.POST,
       uri = uri,
-      entity = HttpEntity(ContentTypes.`application/json`, event.toJson.compactPrint),
+      entity = entity,
       headers = headers
     )
+
   }
 }
 
-trait CloudEventProcessing extends Directives with SprayJsonSupport {
-
-  import CloudEventJsonSupport._
+trait CloudEventProcessing extends Directives {
 
   def route(eventpath : String = "") : Route =
     path(eventpath) {
@@ -191,17 +144,37 @@ trait CloudEventProcessing extends Directives with SprayJsonSupport {
           request.headers.foreach(header => {
             println(s"Header ${header.name()} - ${header.value()}")
           })
-          entity(as[CloudEvent]) { entity ⇒
-            request.headers.foreach(header => {
+          entity(as[Array[Byte]]) { entity ⇒
+            val event = CloudEvent("", null, "", "", None, None, None, None, None, None, None)
+            var extensions : Map[String, Any] = Map()
+            request.headers.foreach { header => {
               header.name() match {
-                case name if name == "ce-id" => entity.id = Some(header.value())
-                case name if name == "ce-source" => entity.source = Some(URI.create(header.value()))
-                case name if name == "ce-specversion" => entity.specversion = Some(header.value())
-                case name if name == "ce-type" => entity.`type` = Some(header.value())
+                // Attributes
+                case name if name == "ce-id" => event.id = header.value()
+                case name if name == "ce-source" => event.source = URI.create(header.value())
+                case name if name == "ce-specversion" => event.specversion = header.value()
+                case name if name == "ce-type" => event.`type` = header.value()
+                case name if name == "ce-dataschema" => event.dataschema = Some(URI.create(header.value()))
+                case name if name == "ce-subject" => event.subject = Some(header.value())
+                case name if name == "ce-time" => event.time = Some(ZonedDateTime.parse(header.value()))
+                // extensions
+                case name if name.startsWith("ce-") && (name.contains("extension")) =>
+                  val nend = name.indexOf("extension")
+                  val exname = name.substring(3, nend)
+                  extensions = extensions .+(exname -> header.value())
+                // Data
+                case name if name == "ce-datacontenttype" =>
+                  if (header.value().contains("json") || header.value().contains("javascript") || header.value().contains("text"))
+                    event.data = Some(new String(entity))
+                  else
+                    event.data_base64 = Some(entity)
                 case _ =>
               }
-            })
-            processEvent(entity)
+            }
+              if (extensions.size > 0)
+                event.extensions = Some(extensions)
+            }
+            processEvent(event)
             complete(StatusCodes.OK)
           }
         }
