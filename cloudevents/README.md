@@ -86,7 +86,22 @@ and event consumer is set through trigger object.
 
 ## Cleanup
 ````
+kubectl delete broker default
+kubectl delete trigger service-consumer-trigger
+kubectl delete deployment service-consumer
+kubectl delete service service-consumer
+kubectl delete ContainerSource eventspublisher
+
+kubectl delete channel default
+kubectl delete Subscription subscription
+kubectl delete ksvc events-reciever-channel
+kubectl delete ContainerSource events-publisher-channel
+
 kubectl delete ksvc eventsreciever
+kubectl delete ContainerSource eventspublisher
+
+kubectl delete deployment events-source-deployment
+kubectl delete SinkBinding bind-cloud-events
 ````
 
 Copyright (C) 2020 Lightbend Inc. (https://www.lightbend.com).

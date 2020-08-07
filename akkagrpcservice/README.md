@@ -37,6 +37,7 @@ where traffic is routed
 
 ## Cleanup
 ````
+kubectl delete ksvc grpcserviceakka
 kubectl delete ksvc grpcversioned
 ````
 Copyright (C) 2020 Lightbend Inc. (https://www.lightbend.com).

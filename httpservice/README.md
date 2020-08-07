@@ -31,7 +31,7 @@ Here keys `-k -v --http2` are optional
 
 ## Cleanup
 ````
-kubectl delete ksvc grpcservice
+kubectl delete ksvc httpservice
 ````
 
 Copyright (C) 2020 Lightbend Inc. (https://www.lightbend.com).
