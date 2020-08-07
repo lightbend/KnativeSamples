@@ -42,7 +42,7 @@ which I tried:
 * [sinkbinding](deploy/sinkbinding).
 * using a [broker](deploy/broker). For more details look [here](https://knative.dev/docs/eventing/broker/)
 
-For direct connection use [eventsreciever.yaml](deploy/eventsreciever.yaml) and [eventssource.yaml.yaml](deploy/eventssource.yaml) to do the following:
+For direct connection use [eventsreciever.yaml](deploy/direct/eventsreciever.yaml) and [eventssource.yaml.yaml](deploy/direct/eventssource.yaml) to do the following:
 ````
 kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/eventsreciever.yaml
 kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/eventssource.yaml
