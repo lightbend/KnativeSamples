@@ -44,8 +44,8 @@ which I tried:
 
 For direct connection use [eventsreciever.yaml](deploy/direct/eventsreciever.yaml) and [eventssource.yaml.yaml](deploy/direct/eventssource.yaml) to do the following:
 ````
-kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/eventsreciever.yaml
-kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/eventssource.yaml
+kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/direct/eventsreciever.yaml
+kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/direct/eventssource.yaml
 ````
 Once everything is running, you can see that the events are published and reciever shows events
 
@@ -59,6 +59,18 @@ kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/sinkbin
 
 Unlike, the previous case, where event source was directly binded to the reciever, here the binding is done using a separate
 object - sinkbinding.yaml.
+
+For channel based connection use [channel.yaml](deploy/channel/channel.yaml), [eventssource.yaml](deploy/channel/eventssource.yaml) 
+[eventsreciever.yaml](deploy/channel/eventsreciever.yaml) and [subscription.yaml](deploy/channel/subscription.yaml) and to do the following:
+````
+kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/channel/channel.yaml
+kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/channel/eventssource.yaml
+kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/channel/eventsreciever.yaml 
+kubectl apply -f /Users/boris/Projects/KnativeSamples/cloudevents/deploy/channel/subscription.yaml
+````
+Here event source is writing to a channel, which in turn writes to the event consumer. Connection between 
+event source and channel is set in the eventssource.yaml (sink), while connection between channel 
+and event consumer is set through subscription object.
 
 For broker based connection use [broker.yaml](deploy/broker/broker.yaml), [eventssource.yaml](deploy/broker/eventssource.yaml) 
 [serviceconsumer.yaml](deploy/broker/serviceconsumer.yaml) and [trigger.yaml](deploy/broker/trigger.yaml) and to do the following:

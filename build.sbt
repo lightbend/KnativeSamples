@@ -63,14 +63,6 @@ lazy val akkagrpcservice = sbtdockerAppBase("akkagrpcservice")("./akkagrpcservic
     mainClass in Compile := Some("com.lightbend.knative.serving.GreeterServer")
   )
 
-lazy val simpleevents = sbtdockerAppBase("simpleevents")("./simpleevents")
-  .enablePlugins(JavaAgent)
-  .settings(
-    libraryDependencies ++= Seq(akkaActors, akkaStreams, akkaHTTP, akkaHTTP2, akkaJson, slf4jAPI, slf4jLog4J),
-    javaAgents += "org.mortbay.jetty.alpn" % "jetty-alpn-agent" % alpnVersion % "runtime",
-    mainClass in Compile := Some("com.lightbend.knative.eventing.SimpleEvents")
-  )
-
 lazy val cloudevents = sbtdockerAppBase("cloudevents")("./cloudevents")
   .enablePlugins(JavaAgent)
   .settings(

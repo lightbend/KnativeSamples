@@ -121,7 +121,7 @@ On Mac use brew to install [cli](https://knative.dev/docs/install/install-kn/)
 ````
 brew install knative/client/kn
 ````
-For the list of `kn` go [here](https://github.com/knative/client/blob/master/docs/cmd/kn.md)
+For the list of `kn` commands go [here](https://github.com/knative/client/blob/master/docs/cmd/kn.md)
 
 Copyright (C) 2020 Lightbend Inc. (https://www.lightbend.com).
 
