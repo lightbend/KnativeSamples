@@ -161,7 +161,7 @@ trait CloudEventProcessing extends Directives {
                 case name if name.startsWith("ce-") && (name.contains("extension")) =>
                   val nend = name.indexOf("extension")
                   val exname = name.substring(3, nend)
-                  extensions = extensions .+(exname -> header.value())
+                  extensions = extensions.+(exname -> header.value())
                 // Data
                 case name if name == "ce-datacontenttype" =>
                   if (header.value().contains("json") || header.value().contains("javascript") || header.value().contains("text"))
@@ -173,6 +173,8 @@ trait CloudEventProcessing extends Directives {
             }
               if (extensions.size > 0)
                 event.extensions = Some(extensions)
+                if(event.datacontenttype == None)    // We did not get content type, default it to JSON
+                  event.data = Some(new String(entity))
             }
             processEvent(event)
             complete(StatusCodes.OK)
