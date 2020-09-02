@@ -1,0 +1,12 @@
+apiVersion: eventing.knative.dev/v1beta1
+kind: EventType
+metadata:
+  name: org.lightbend.knative.test
+  namespace: default
+spec:
+  type: org.lightbend.knative.test
+  source: https://github.com/knative/eventing
+  schema: https://example.net/root.json
+  schemaData: schema itself
+  description: sample event
+  broker: default
