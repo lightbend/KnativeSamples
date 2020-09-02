@@ -4,9 +4,15 @@ metadata:
   name: org.lightbend.knative.test
   namespace: default
 spec:
+  # This refers to the CloudEvent type as it enters into the event mesh. It is mandatory. Event consumers can (and in most cases would) create Triggers filtering on this attribute.
   type: org.lightbend.knative.test
+  # Refers to the CloudEvent source as it enters into the event mesh. It is mandatory. Event consumers can (and in most cases would) create Triggers filtering on this attribute.
   source: https://github.com/knative/eventing
+  # A valid URI with the EventType schema. It may be a JSON schema, a protobuf schema, etc. It is optional.
   schema: https://example.net/root.json
+  # SchemaData allows the CloudEvents schema to be stored directly in the EventType. Content is dependent on the encoding. Optional attribute. The contents are not validated or manipulated by the system.
   schemaData: schema itself
+  # Description is an optional field used to describe the EventType, in any meaningful way. Optional field
   description: sample event
+  # Refers to the Broker that can provide the EventType. Optional field
   broker: default
