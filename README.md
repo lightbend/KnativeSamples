@@ -105,7 +105,7 @@ spec:
     userOperator: {}
 EOF
 ````
-Install the channel
+Install the channel 
 ````
 curl -L "https://github.com/knative/eventing-contrib/releases/download/v0.16.0/kafka-channel.yaml" \
  | sed 's/REPLACE_WITH_CLUSTER_URL/my-cluster-kafka-bootstrap.kafka:9092/' \
